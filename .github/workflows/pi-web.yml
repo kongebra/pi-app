@@ -1,0 +1,24 @@
+name: Pi Web CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/pi-web.yml
+      - src/web/*
+  pull_request:
+    branches: 
+      - main
+    paths:
+      - .github/workflows/pi-web.yml
+      - src/web/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build the Docker image
+      run: docker build ./src/web -t kongebra/pi-webapp:$(date +%s)
