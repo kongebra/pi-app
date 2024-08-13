@@ -24,7 +24,7 @@ jobs:
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build the Docker image
-        run: docker build ./src/web -t kongebra/pi-webapp:${{ github.sha }} --platform linux/arm64
+        run: docker build ./src/web --platform linux/arm64 -t kongebra/pi-webapp:${{ github.sha }}
 
       - name: Push the Docker image
         run: docker push kongebra/pi-webapp:${{ github.sha }}
