@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pi-web
+  labels:
+    app: pi-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pi-web
+  template:
+    metadata:
+      labels:
+        app: pi-web
+    spec:
+      containers:
+        - name: pi-web
+          image: kongebra/pi-web:latest
+          ports:
+            - containerPort: 3000

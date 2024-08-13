@@ -8,7 +8,7 @@ on:
       - .github/workflows/pi-web.yml
       - src/web/*
   pull_request:
-    branches: 
+    branches:
       - main
     paths:
       - .github/workflows/pi-web.yml
@@ -18,7 +18,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Build the Docker image
-      run: docker build ./src/web -t kongebra/pi-webapp:$(date +%s)
+      - uses: actions/checkout@v4
+
+      - name: Docker login
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build the Docker image
+        run: docker build ./src/web -t kongebra/pi-webapp:${{ github.sha }} --platform linux/arm64
+
+      - name: Push the Docker image
+        run: docker push kongebra/pi-webapp:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f src/web/deployment.yaml
+          kubectl apply -f src/web/service.yaml
